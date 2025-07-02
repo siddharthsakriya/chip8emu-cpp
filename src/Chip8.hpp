@@ -31,4 +31,6 @@ public:
     void initialise();
     void loadGame(const std::string& filename);
     void emulateCycle();
+    void decodeAndExecute(Instruction instruction);
+    Instruction readInstruction();
 };
