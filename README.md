@@ -1,3 +1,5 @@
+### CHIP-8 Emulator
+Building this project to further improve my C++ 
 
 ### TODO
 - [ ] Implement Chip8 HPP + CPP
