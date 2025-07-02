@@ -1,14 +1,16 @@
 #pragma once
 #include "Memory.hpp"
 
+#include <array>
 #include <cstdint>
 #include <string>
+
 using Instruction = uint16_t;
 
 class Chip8 {
 private:
     // general purpose registers
-    uint8_t V[16];
+    std::array<uint16_t, 16> V{};
 
     // index register
     uint16_t I; 
@@ -26,8 +28,7 @@ private:
 
 public:
     Chip8();
-    void initialize();
-    void execute();
+    void initialise();
     void loadGame(const std::string& filename);
     void emulateCycle();
 };

@@ -1,12 +1,16 @@
 #pragma once
 #include <cstdint>
+#include <array>
 
 class Memory {
     private:
-        uint8_t memory[4096]; 
-        uint16_t stack[16];
-    public:
+        std::array<uint8_t, 4096> memory{};
+        std::array<uint8_t, 16> stack{};
+
+    public:        
         // push value to stack
+        void initialise();
+
         void pushToStack(uint16_t value, uint8_t& sp){
             if (sp < 16) {
                 stack[sp++] = value;
@@ -33,6 +37,6 @@ class Memory {
         void writeByte(uint16_t address, uint8_t value) {
             if (address < 4096) {
                 memory[address] = value;
-            }
+            };
         };
 };
