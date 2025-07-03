@@ -130,6 +130,7 @@ void Chip8::handle0group(uint16_t nnn) {
     switch (nnn) {
         case 0x00E0: 
             // CLS
+            handleClearScreen();
             break;
 
         case 0x00EE:
@@ -168,26 +169,44 @@ void Chip8::handle8group(uint8_t n, uint8_t x, uint8_t y) {
         break;
     
     case 0x4:
-        // ADD Vx, Vy
-        // TODO: flag setting
-        V[x] += V[y];
+        {
+            // ADD Vx, Vy
+            uint16_t sum = V[x] + V[y];
+            V[0xF] = (sum > 0xFF);
+            V[x] = sum & 0xFF;
+            break; 
+        }
     
     case 0x5:
-        // SUB Vx, Vy
-        // TODO: flag setting
-        V[x] -= V[y];
+        {
+            // SUB Vx, Vy
+            uint8_t diff = V[x] - V[y];
+            V[0xF] = (V[x] > V[y]);
+            V[x] = diff;
+            break;
+        }   
     
     case 0x6:
         // SHR Vx {, Vy}
+        V[0xF] = V[x] & 0x1;
         V[x] >>= 1;
+        break;
     
     case 0x7:
-        // SUBN Vx, Vy
-        V[x] = V[y] - V[x];
+        {
+            // SUBN Vx, Vy
+            uint8_t diff = V[y] - V[x];
+            V[0xF] = (V[y] > V[x]);
+            V[x] = diff;
+            break;
+        }
+
     case 0xE:
         // SHL Vx {, Vy}
+        V[0xF] = (V[x] & 0x80) >> 7; 
         V[x] <<= 1;
         break;
+        
     default:
         std::cerr << "Unknown 8 group opcode: " << std::hex << n << std::dec << std::endl;
         break;
@@ -261,6 +280,12 @@ void Chip8::handleFgroup(uint8_t x, uint8_t y, uint8_t n) {
     }      
 }
 
+void Chip8::handleClearScreen() {
+    for (auto& row : display) {
+        row.fill(false);
+    }
+}
+
 void Chip8::emulateCycle() {
     // read instruction from memory 
     Instruction instruction = readInstruction();    
@@ -268,6 +293,8 @@ void Chip8::emulateCycle() {
     
     // decode and execute instruction
 }
+
+
 
 
 
