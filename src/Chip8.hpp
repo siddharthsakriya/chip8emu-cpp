@@ -35,4 +35,6 @@ private:
     void decodeAndExecute(Instruction instruction);
     void handle0group(uint16_t nnn);
     void handle8group(uint8_t n, uint8_t x, uint8_t y);
+    void handleEgroup(uint8_t x, uint8_t y, uint8_t n);
+    void handleFgroup(uint8_t x, uint8_t y, uint8_t n);
 };

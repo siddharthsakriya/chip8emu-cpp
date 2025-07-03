@@ -13,7 +13,7 @@ void Chip8::initialise() {
 
 Instruction Chip8::readInstruction() {
     uint8_t byte1 = memory.readByte(PC);
-    uint8_t byte2 = memory.readByte(PC);
+    uint8_t byte2 = memory.readByte(PC + 1);
 
     PC += 2; 
     
@@ -96,9 +96,11 @@ void Chip8::decodeAndExecute(Instruction instruction) {
 
         case 0xB000:
             // JP V0, addr
-            uint16_t target = nnn + V[0]; 
-            PC = target;
-            break;
+            {
+                uint16_t target = nnn + V[0]; 
+                PC = target;
+                break;
+            }
         
         case 0xC000:
             // RND Vx, byte
@@ -111,9 +113,11 @@ void Chip8::decodeAndExecute(Instruction instruction) {
 
         case 0xE000:
             // handle E group opcodes
+            handleEgroup(x, y, n);
             break;
         
         case 0xF000:
+        
             break;
         
         default:
@@ -130,10 +134,12 @@ void Chip8::handle0group(uint16_t nnn) {
 
         case 0x00EE:
             // RET
+            PC = memory.popFromStack(SP);
             break;
 
         default:
             // SYS addr
+            PC = nnn; 
             break;
     }
 }
@@ -183,8 +189,76 @@ void Chip8::handle8group(uint8_t n, uint8_t x, uint8_t y) {
         V[x] <<= 1;
         break;
     default:
+        std::cerr << "Unknown 8 group opcode: " << std::hex << n << std::dec << std::endl;
         break;
     }
+}
+
+void Chip8::handleEgroup(uint8_t x, uint8_t y, uint8_t n) {
+    uint8_t yn = (y << 4) | n; 
+    switch (yn)
+    {
+    case 0x9E:
+        // SKP Vx
+
+        break;
+        
+    case 0xA1:
+        // SKNP Vx
+
+        break;
+
+    default:
+        std::cerr << "Unknown E group opcode: " << std::hex << yn << std::dec << std::endl;
+        break;
+    }
+}
+
+void Chip8::handleFgroup(uint8_t x, uint8_t y, uint8_t n) {
+    uint8_t yn = (y << 4) | n; 
+    switch (yn)
+    {
+        case 0x07:
+            // LD Vx, DT
+            V[x] = DT;
+            break;
+        case 0x0A:
+            // LD Vx, K
+            // todo: wait for key press
+            break;       
+        case 0x15:
+            // LD DT, Vx
+            DT = V[x];
+            break;
+        case 0x18:
+            // LD ST, Vx
+            ST = V[x];
+            break;
+        case 0x1E:
+            // ADD I, Vx
+            I += V[x];
+            break;
+        case 0x29:
+            // LD F, Vx
+            break;  
+        case 0x33:
+            // LD B, Vx
+            memory.writeByte(I, V[x] / 100); // hundreds
+            memory.writeByte(I + 1, (V[x] / 10) % 10); // tens
+            memory.writeByte(I + 2, V[x] % 10); // units
+            break;
+        case 0x55:
+            for (uint8_t i = 0; i <= x; ++i) {
+                memory.writeByte(I + i, V[i]);
+            }
+            break;
+
+        case 0x65:
+            for (uint8_t i = 0; i <= x; ++i) {
+                V[i] = memory.readByte(I + i);
+            }
+            break;
+    }      
 }
 
 void Chip8::emulateCycle() {
