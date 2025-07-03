@@ -32,23 +32,71 @@ void Chip8::decodeAndExecute(Instruction instruction) {
     // match on opcode, and then provide logic, or call to function 
     switch (opcode) {
         case 0x0000: 
-            break;
+            switch (nnn) 
+            {
+            case 0x00EE:
+                // RET
+                break;
+            case 0x00E0:
+                // CLS
+                break;
+            default:
+                //SYS addr
+                break;
+            }
         case 0x1000:            
+            // JP addr
             break;
         case 0x2000:
+            // CALL addr
             break;
         case 0x3000:
+            // SE Vx, byte
             break;
         case 0x4000:
+            // SNE Vx, byte
             break;
         case 0x5000:
+            // SE Vx, Vy
             break;
         case 0x6000:
+            // LD Vx, byte
             break;
         case 0x7000:
+            // ADD Vx, byte
             break;
         case 0x8000:
-            break;  
+            
+            switch (n) {
+                case 0x0:
+                    // LD Vx, Vy
+                    break;
+                case 0x1:
+                    // OR Vx, Vy
+                    break;
+                case 0x2:
+                    // AND Vx, Vy
+                    break;
+                case 0x3:
+                    // XOR Vx, Vy
+                    break;
+                case 0x4:
+                    // ADD Vx, Vy
+                    break;
+                case 0x5:
+                    // SUB Vx, Vy
+                    break;
+                case 0x6:
+                    // SHR Vx {, Vy}
+                    break;
+                case 0x7:
+                    // SUBN Vx, Vy
+                    break;
+                case 0xE:
+                    // SHL Vx {, Vy}
+                    break;
+            }
+            break;
         case 0x9000:
             break;
         case 0xA000:
