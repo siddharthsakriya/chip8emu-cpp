@@ -8,6 +8,13 @@
 using Instruction = uint16_t;
 
 class Chip8 {
+public:
+    Chip8();
+    void initialise();
+    void loadGame(const std::string& filename);
+    void emulateCycle();    
+    Instruction readInstruction();
+
 private:
     // general purpose registers
     std::array<uint16_t, 16> V{};
@@ -25,12 +32,7 @@ private:
 
     // memory + stack
     Memory memory;
-
-public:
-    Chip8();
-    void initialise();
-    void loadGame(const std::string& filename);
-    void emulateCycle();
     void decodeAndExecute(Instruction instruction);
-    Instruction readInstruction();
+    void handle0group(uint16_t nnn);
+    void handle8group(uint8_t n, uint8_t x, uint8_t y);
 };

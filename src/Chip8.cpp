@@ -1,4 +1,5 @@
 #include "Chip8.hpp"
+#include <iostream>
 
 Chip8::Chip8() {
     initialise();
@@ -32,83 +33,157 @@ void Chip8::decodeAndExecute(Instruction instruction) {
     // match on opcode, and then provide logic, or call to function 
     switch (opcode) {
         case 0x0000: 
-            switch (nnn) 
-            {
-            case 0x00EE:
-                // RET
-                break;
-            case 0x00E0:
-                // CLS
-                break;
-            default:
-                //SYS addr
-                break;
-            }
-        case 0x1000:            
-            // JP addr
+            handle0group(nnn);
             break;
+
+        case 0x1000: 
+            // JP addr
+            PC = nnn;
+            break;
+       
         case 0x2000:
             // CALL addr
+            memory.pushToStack(PC, SP);
+            PC = nnn;
             break;
+
         case 0x3000:
             // SE Vx, byte
-            break;
-        case 0x4000:
-            // SNE Vx, byte
-            break;
-        case 0x5000:
-            // SE Vx, Vy
-            break;
-        case 0x6000:
-            // LD Vx, byte
-            break;
-        case 0x7000:
-            // ADD Vx, byte
-            break;
-        case 0x8000:
-            
-            switch (n) {
-                case 0x0:
-                    // LD Vx, Vy
-                    break;
-                case 0x1:
-                    // OR Vx, Vy
-                    break;
-                case 0x2:
-                    // AND Vx, Vy
-                    break;
-                case 0x3:
-                    // XOR Vx, Vy
-                    break;
-                case 0x4:
-                    // ADD Vx, Vy
-                    break;
-                case 0x5:
-                    // SUB Vx, Vy
-                    break;
-                case 0x6:
-                    // SHR Vx {, Vy}
-                    break;
-                case 0x7:
-                    // SUBN Vx, Vy
-                    break;
-                case 0xE:
-                    // SHL Vx {, Vy}
-                    break;
+            if (V[x] == kk) {
+                PC += 2; // skip next instruction
             }
             break;
+
+        case 0x4000:
+            // SNE Vx, byte
+            if (V[x] != kk) {
+                PC += 2; // skip next instruction
+            }
+            break;
+        
+        case 0x5000:
+            // SE Vx, Vy
+            if (V[x] == V[y]) {
+                PC += 2; // skip next instruction
+            }
+            break;
+        
+        case 0x6000:
+            // LD Vx, byte
+            V[x] = kk; 
+            break;
+        
+        case 0x7000:
+            // ADD Vx, byte
+            V[x] += kk;
+            break;
+
+        case 0x8000:
+            handle8group(n, x, y);
+            break;
+        
         case 0x9000:
+            // SNE Vx, Vy
+            if (V[x] != V[y]) {
+                PC += 2; // skip next instruction
+            }
             break;
+        
         case 0xA000:
+            // LD I, addr
+            I = nnn; 
             break;
+
         case 0xB000:
+            // JP V0, addr
+            uint16_t target = nnn + V[0]; 
+            PC = target;
             break;
+        
         case 0xC000:
+            // RND Vx, byte
+            V[x] = (rand() % 256) & kk; 
             break;
+
         case 0xD000:
+            // DRW Vx, Vy, nibble
             break;
+
         case 0xE000:
+            // handle E group opcodes
             break;
+        
+        case 0xF000:
+            break;
+        
+        default:
+            std::cerr << "Unknown opcode: " << std::hex << instruction << std::dec << std::endl;
+            break;
+    }
+}
+
+void Chip8::handle0group(uint16_t nnn) {
+    switch (nnn) {
+        case 0x00E0: 
+            // CLS
+            break;
+
+        case 0x00EE:
+            // RET
+            break;
+
+        default:
+            // SYS addr
+            break;
+    }
+}
+
+void Chip8::handle8group(uint8_t n, uint8_t x, uint8_t y) {
+    switch (n)
+    {
+    case 0x0:
+        // LD Vx, Vy
+        V[x] = V[y];
+        break;
+    
+    case 0x1:
+        // OR Vx, Vy
+        V[x] |= V[y];
+        break;
+    
+    case 0x2:
+        // AND Vx, Vy
+        V[x] &= V[y];
+        break;
+    
+    case 0x3:
+        // XOR Vx, Vy
+        V[x] ^= V[y];
+        break;
+    
+    case 0x4:
+        // ADD Vx, Vy
+        // TODO: flag setting
+        V[x] += V[y];
+    
+    case 0x5:
+        // SUB Vx, Vy
+        // TODO: flag setting
+        V[x] -= V[y];
+    
+    case 0x6:
+        // SHR Vx {, Vy}
+        V[x] >>= 1;
+    
+    case 0x7:
+        // SUBN Vx, Vy
+        V[x] = V[y] - V[x];
+    case 0xE:
+        // SHL Vx {, Vy}
+        V[x] <<= 1;
+        break;
+    default:
+        break;
     }
 }
 
